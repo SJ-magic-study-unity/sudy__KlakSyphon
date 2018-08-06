@@ -1,0 +1,108 @@
+/************************************************************
+KlakSyphon
+************************************************************/
+■元souece
+	https://github.com/keijiro/KlakSyphon
+	
+	desctiption @ the original site.
+		KlakSyphon is a Syphon plugin for Unity that allows sharing frames between applications with minimum CPU/GPU cost.
+
+		The most important feature of KlakSyphon is that it supports Metal. You can use Metal on Unity to utilize the GPU features and,
+		at the same time, use Unity in combinations with other Syphon-enabled OpenGL applications, like VDMX or MadMapper.
+		
+		System Requirements
+			Unity 2018.1
+			Metal graphics API
+			MacOS 10.12 Sierra
+				KlakSyphon only supports Metal; It doesnt support the OpenGL (GL Core) mode.
+		
+		MacOS 10.11 El Capitan is also supported, but some Mac models (iMac/MacBook with NVIDIA GPU) have problems with required functionalities on it. 10.12 Sierra is safer choice to support wider range of devices.
+		
+		
+■Syphonを使ってUnityの絵をTouchDesignerに送る(macOS)
+	https://qiita.com/sada_lp1/items/c892aeb3462b86bcd469
+	
+
+■study : old version of syphon
+	https://github.com/SJ-magic-study-unity/study__UnitySyphon
+	
+	contents
+		unity側で、open GL 2を指定する必要があった。
+		∴ unity 5.3以前でないと使えなかった。
+		今回は、最新のunityでもsyphonを使うための調査.
+	
+	
+/************************************************************
+my note
+************************************************************/
+■common
+*	I tested with "Unity2018.2.2f1"
+*	check : Run in back ground
+*	Graphic API for mac
+		metal(default)
+		
+		github says
+			System Requirements
+				Unity 2018.1
+				Metal graphics API
+				MacOS 10.12 Sierra
+				
+				KlakSyphon only supports Metal; It doesnt support the OpenGL (GL Core) mode.
+				MacOS 10.11 El Capitan is also supported, but some Mac models (iMac/MacBook with NVIDIA GPU) have problems with required functionalities on it. 10.12 Sierra is safer choice to support wider range of devices.
+
+
+■server
+	how to use (unity)
+		just add "syphon server" to main camera
+		
+	how to use (receiver = oF)
+		client_direct.set("xxx","xxx"); // void set(string _serverName, string _appName);
+		において、
+		_serverName	=	Main Camera(Object Name)
+		_appName	= 	PlayerSetting/ ProductName (not app name.)
+						Unity(when simulation on Unity Editor)
+
+
+■client
+	steps
+		1	import plugin
+		2	attachするObjectは、何でもOK
+			空のObjectにattachして、これをclient側のreceive port的に使用する、など
+			
+		3	script setting in inspector
+				App Name	= oFのapp name
+				Server Name	= ofxSyphonServer::setName("xxx"); で指定したname.
+			
+				Target texture
+					Project viewから、Render textureを作成し、これを指定。
+					ここで指定したtextureに送られるので、同textureを使って、materialに使いまわせる。
+					material上のalbedo, Height mapなどにも使いまわせる。
+					
+				Target Renderer
+					Objectを指定する。
+					Objectを指定すると、同Objectにattachされたmaterial/shaderに従い、「その、どのparameterにsyphon textureを送るか」を選択可能になる。
+					Target textureの方が柔軟な使用が可能、と言えるが、spot的に使うならこれでもOK.
+					materaialは、同Object用に別途、準備すること。
+					
+	
+	tips
+		以下のように、1つのreceive portで全て受けて、各textureに画像を送信し、
+		
+			syphon_client(空のObject)
+				Syphon client
+					App Name		test_syphon
+					Server Name		Screen Output
+					Target texture	syphonTexture_0
+					Target Renderer	none
+					
+				Syphon client
+					App Name		test_syphon
+					Server Name		Texture Output
+					Target texture	syphonTexture_1
+					Target Renderer	none
+					
+				...
+				
+		これらtextureを使ってそれぞれmaterialを作成する。
+
+
